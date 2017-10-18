@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vue.JS Tutorial</title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600,800,900" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Cairo" rel="stylesheet">
+    <link rel="stylesheet" href="animation.css">
+    <style>
+      .taskDone {
+        text-decoration: line-through;
+      }
+    </style>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+
+  <body>
+    <div id="app">
+        
+      <div class="row" id="main">
+        <div class="col-md-6 col-sm-12">
+          <div class="right-side">
+            <form class="form-inline" @submit="addTask">
+                <div class="form-group">
+                  <input type="text" class="form-control" v-model="tasks.name">
+                </div>
+
+                <input type="submit" class="btn btn-success" value="اضف المهمة">
+            </form>
+
+            <hr>
+
+            <div class="showTasks" v-show="tasks.length">
+                <h4>مهام اليوم</h4>
+                <hr>
+              <table class="table">
+                <thead>
+                  <tr class="text-right">
+                    <th>تم</th>
+                    <th> المهمة</th>
+                    <th>حذف </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for= "task in tasks">
+                    <td><input type="checkbox"v-model="task.done" @change="completeTask(task)"></td>
+                    <td><span :class="{ taskDone: task.done }">{{task.name}}</span></td>
+                    <td><span style="cursor:pointer" class="pull-left glyphicon glyphicon-trash" @click="deleteTask(task)"></span></td>
+                  </tr>
+                </tbody>
+              </table>
+                <hr>
+              <a class=" btn-sm">كل المهام ({{totalTasks}})<a/>
+                <a class=" btn-sm">المهام المكتملة ({{doneTasks}})<a/>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            
+          <div class="left-side ">
+            <h1 class=" title text-center">انجا<span style="color:#FEC730;">زي</span></h1>
+            <div id="circle"></div>
+            <img class="img-responsive hidden-sm hidden-xs" src="Houer.png" alt="">
+            <div class="bubbles"></div>
+          </div>
+          
+        
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script src="https://unpkg.com/vue@2.0.3/dist/vue.js"></script>
+  <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/1.0.0/dist/progressbar.js"></script>
+
+  <script>
+          var app = new Vue({
+              el: "#app",
+              data: {
+                  tasks: [
+                      {name: 'learn vue.js', done: false},
+                      {name: 'learn vue.js', done: false},
+                      {name: 'learn vue.js', done: true}
+                  ]
+              },
+
+              methods: {
+
+                  completeTask: function(task) {
+                      this.updateChart();
+                  },
+                  addTask: function (e) {
+                      e.preventDefault();
+                      this.tasks.push({
+                          name: this.tasks.name,
+                          done: false
+                      });
+                      this.updateChart();
+
+                  },
+                  deleteTask: function (task) {
+                      this.tasks.splice(this.tasks.indexOf(task), 1);
+                      this.updateChart();
+                  },
+                  updateChart: function() {
+                      document.getElementById('circle').innerHTML='';
+                      var bar = new ProgressBar.Circle(circle, {
+                          color: '#aaa',
+                          // This has to be the same size as the maximum width to
+                          // prevent clipping
+                          strokeWidth: 4,
+                          trailWidth: 1,
+                          easing: 'easeInOut',
+                          duration: 1400,
+                          text: {
+                              autoStyleContainer: false
+                          },
+                          from: { color: '#aaa', width: 1 },
+                          to: { color: '#F6C853', width: 4 },
+                          // Set default step function for all animate calls
+                          step: function(state, circle) {
+                              circle.path.setAttribute('stroke', state.color);
+                              circle.path.setAttribute('stroke-width', state.width);
+
+                              var value = Math.round(circle.value() * 100);
+                              if (value === 0) {
+                                  circle.setText(0+'%');
+                              } else {
+                                  circle.setText(value+'%');
+                              }
+
+                          }
+                      });
+                      bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+                      bar.text.style.fontSize = '2rem';
+
+                      todoArray = this.tasks;
+                      console.log(todoArray.length + 'number of todos');
+
+                      let completed = 0;
+                      for(let i =0; i<todoArray.length; i++){
+                          if(todoArray[i].done == true) {
+                              completed++;
+                          }
+                      }
+
+                      console.log(completed + 'completed');
+
+
+                      bar.animate(completed / (todoArray.length == 0? 1: todoArray.length));
+
+
+                  }
+
+              },
+              computed: {
+                  totalTasks() {
+                      return this.tasks.length;
+                  },
+                  doneTasks() {
+                      return this.tasks.reduce((sum, item) => {
+                          return item.done ? sum + 1 : sum;
+                      }, 0);
+                  }
+              }
+          });
+
+  </script>
+  <script src="chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="animation.js"></script>
+</html>
